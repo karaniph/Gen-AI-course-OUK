@@ -1,3 +1,4 @@
 byllm
 GitPython
 tree-sitter
+openai

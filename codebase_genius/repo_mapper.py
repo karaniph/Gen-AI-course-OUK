@@ -1,6 +1,7 @@
 import os
 from git import GitCommandError
-from repo_utils import clone_repo, generate_file_tree
+from .repo_utils import clone_repo, generate_file_tree, get_file_content
+from .llm_agent import LLMAgent
 
 class RepoMapper:
     """
@@ -10,6 +11,7 @@ class RepoMapper:
     def __init__(self, clone_base_dir: str = "cloned_repos"):
         self.clone_base_dir = clone_base_dir
         os.makedirs(self.clone_base_dir, exist_ok=True)
+        self.llm_agent = LLMAgent()
 
     def map_repository(self, repo_url: str) -> dict:
         """
@@ -40,7 +42,7 @@ class RepoMapper:
 
         file_tree = generate_file_tree(local_path)
 
-        return {
+        result = {
             "status": "success",
             "repo_url": repo_url,
             "repo_name": repo_name,
@@ -48,11 +50,23 @@ class RepoMapper:
             "file_tree": file_tree
         }
 
+        # 4. Summarize the README
+        readme_path = os.path.join(local_path, "README.md")
+        readme_summary = ""
+        if os.path.exists(readme_path):
+            readme_content = get_file_content(readme_path)
+            readme_summary = self.llm_agent.summarize_readme(readme_content)
+        
+        # Add the summary to the result
+        result["readme_summary"] = readme_summary
+
+        return result
+
 # Example usage for testing
 if __name__ == '__main__':
     # Add the parent directory to the path for relative imports
     import sys
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
     
     # NOTE: Use a small, public test repository
     TEST_REPO = "https://github.com/pallets/flask.git"
