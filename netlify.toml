@@ -1,0 +1,18 @@
+[build]
+  # Build command to install dependencies and prepare functions
+  command = "pip install -r requirements.txt"
+  # Directory where Netlify will look for functions
+  functions = "netlify/functions"
+
+[dev]
+  # Local development server settings
+  framework = "#custom"
+  command = "uvicorn main:app --host 0.0.0.0 --port 8000"
+  targetPort = 8000
+  publish = "documentation_output"
+
+[[redirects]]
+  # Redirect all API calls to the serverless function
+  from = "/api/*"
+  to = "/.netlify/functions/main"
+  status = 200

@@ -2,3 +2,4 @@ byllm
 GitPython
 tree-sitter
 openai
+mangum
